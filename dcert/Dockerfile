@@ -9,8 +9,10 @@ expose 80 443
 # run apt-get update
 run apk update
 
+# # certbot 2.9.0
 # run apt install -y openssl certbot python3-certbot-nginx
 RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
+
 run apk add -f -q openssl certbot certbot-nginx bash && apk cache clean
 # run 
 add dr.sh /
