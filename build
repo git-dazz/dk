@@ -1,0 +1,52 @@
+#!/bin/bash
+
+mode=$1
+
+# docker user name
+dk=ctun
+
+wd=$PWD
+dist=".dist"
+
+
+function dkbuild(){
+    name=$1;
+    t=$(date "+%y%m%d-%H%M%S")
+    cd "$wd/$name" && docker build -t  "$dk/$name:$t" .
+    echo -e "\n\n====== save file ======\n  $dist/$name-$t.tar"
+    docker save -o "$wd/$dist/$name-$t.tar"  "$dk/$name:$t"
+    docker image tag "$dk/$name:$t" "$dk/$name:latest"
+    docker push "$dk/$name:$t" 
+    docker push "$dk/$name:latest"
+}
+
+function getPkgList(){
+    list=$(find ./ -iwholename "*/Dockerfile"| tr 'A-Z' 'a-z'| sed 's|^\./||' | sed 's|/dockerfile$||'|tr '\n' ' ');
+    echo $list;
+}
+function ifNoArgs(){
+    if [ "$mode" = "" ]; then
+        list=$(getPkgList);
+        echo "you can build:[ $list ]";
+        exit 0;
+    fi
+}
+
+function ifArgsIsDir() {
+    mkdir -p "$dist"
+    if [ -d "$mode" ]; then
+        dkbuild "$mode"
+    else
+        exit 1;
+    fi
+}
+
+function main(){
+    ifNoArgs
+    ifArgsIsDir
+}
+
+main;
+
+
+
